@@ -1,19 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace CodingTracker.Models;
 
-namespace CodingTracker.Models
+internal class Enums
 {
-    internal class Enums
+    public enum MenuSelection
     {
-        public enum MenuSelection
-        {
-            ViewRecords,
-            AddRecord,
-            UpdateRecord,
-            DeleteRecord
-        }
+        LiveSession,
+        ViewRecords,
+        AddRecord,
+        UpdateRecord,
+        DeleteRecord,
+        CloseApplication
+    }
+
+    public enum UpdatingSelection
+    {
+        StartTime,
+        EndTime,
+        SaveChanges,
+        MainMenu
     }
 }
