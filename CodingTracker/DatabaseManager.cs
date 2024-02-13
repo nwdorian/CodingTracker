@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using Dapper;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 
@@ -21,11 +22,9 @@ internal class DatabaseManager
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
-                using (var tableCmd = connection.CreateCommand())
-                {
                     connection.Open();
 
-                    tableCmd.CommandText =
+                    var createTable =
                         @"CREATE TABLE IF NOT EXISTS coding(
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         StartTime TEXT,
@@ -33,8 +32,7 @@ internal class DatabaseManager
                         Duration TEXT
                         )";
 
-                    tableCmd.ExecuteNonQuery();
-                }
+                    connection.Execute(createTable);
             }
         }
         catch (Exception e)

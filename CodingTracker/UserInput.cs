@@ -89,6 +89,7 @@ internal class UserInput
                 case UpdatingSelection.SaveChanges:
                     updating = false;
                     codingController.Update(coding);
+                    MainMenu();
                     break;
                 case UpdatingSelection.MainMenu:
                     updating = false;

@@ -1,4 +1,5 @@
 ﻿using CodingTracker.Models;
+using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
@@ -25,12 +26,9 @@ internal class CodingController
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
-                using (var tableCmd = connection.CreateCommand())
-                {
-                    connection.Open();
-                    tableCmd.CommandText = $"INSERT INTO coding (StartTime, EndTime, Duration) VALUES ('{coding.StartTime}', '{coding.EndTime}', '{coding.Duration}')";
-                    tableCmd.ExecuteNonQuery();
-                }
+                connection.Open();
+                var insert = @"INSERT INTO coding (StartTime, EndTime, Duration) VALUES (@StartTime, @EndTime, @Duration)";
+                connection.Execute(insert, coding);
             }
 
             AnsiConsole.Write("New record was succesfully added! Press any key to continue... ");
@@ -38,7 +36,8 @@ internal class CodingController
         }
         catch (Exception e)
         {
-            AnsiConsole.WriteLine("Error! Details: " + e.Message);
+            AnsiConsole.Write($"\nError! Details: {e.Message}\nPress any key to continue... ");
+            Console.ReadKey();
         }
     }
 
@@ -50,39 +49,17 @@ internal class CodingController
 
             using (var connection = new SqliteConnection(_connectionString))
             {
-                using (var tableCmd = connection.CreateCommand())
-                {
-                    connection.Open();
-                    tableCmd.CommandText = "SELECT * FROM coding";
-
-                    using (var reader = tableCmd.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            while (reader.Read())
-                            {
-                                tableData.Add(
-                                    new Coding
-                                    {
-                                        Id = reader.GetInt32(0),
-                                        StartTime = reader.GetString(1),
-                                        EndTime = reader.GetString(2),
-                                    });
-                            }
-                        }
-                        else
-                        {
-                            AnsiConsole.WriteLine("No rows found!");
-                        }
-                    }
-                }
+                connection.Open();
+                var getAll = "SELECT * FROM coding";
+                tableData = connection.Query<Coding>(getAll).ToList();
             }
 
             TableVisualisation.ShowTable(tableData);
         }
         catch (Exception e)
         {
-            AnsiConsole.WriteLine("Error! Details: " + e.Message);
+            AnsiConsole.Write($"\nError! Details: {e.Message}\nPress any key to continue... ");
+            Console.ReadKey();
         }
     }
 
@@ -92,29 +69,15 @@ internal class CodingController
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
-                using (var tableCmd = connection.CreateCommand())
-                {
-                    connection.Open();
-                    tableCmd.CommandText = $"SELECT * FROM coding WHERE Id = '{id}'";
-
-                    using (var reader = tableCmd.ExecuteReader())
-                    {
-                        Coding coding = new();
-                        if (reader.HasRows)
-                        {
-                            reader.Read();
-                            coding.Id = reader.GetInt32(0);
-                            coding.StartTime = reader.GetString(1);
-                            coding.EndTime = reader.GetString(2);
-                        }
-                        return coding;
-                    }
-                }
+                connection.Open();
+                var get = $"SELECT * FROM coding WHERE Id = @Id";
+                return connection.QuerySingle<Coding>(get, new { Id = id });
             }
         }
         catch (Exception e)
         {
-            AnsiConsole.WriteLine("Error! Details: " + e.Message);
+            AnsiConsole.Write($"\nError! Details: {e.Message}\nPress any key to continue... ");
+            Console.ReadKey();
         }
         return null;
     }
@@ -125,19 +88,17 @@ internal class CodingController
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
-                using (var tableCmd = connection.CreateCommand())
-                {
-                    connection.Open();
-                    tableCmd.CommandText = $"DELETE FROM coding WHERE Id = '{id}'";
-                    tableCmd.ExecuteNonQuery();
-                }
+                connection.Open();
+                var delete = $"DELETE FROM coding WHERE Id = @Id";
+                connection.Execute(delete, new { Id = id });
             }
             AnsiConsole.Write($"Record with {id} was succesfully deleted! Press any key to continue... ");
             Console.ReadKey();
         }
         catch (Exception e)
         {
-            AnsiConsole.WriteLine("Error! Details: " + e.Message);
+            AnsiConsole.Write($"\nError! Details: {e.Message}\nPress any key to continue... ");
+            Console.ReadKey();
         }
     }
 
@@ -147,24 +108,22 @@ internal class CodingController
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
-                using (var tableCmd = connection.CreateCommand())
-                {
-                    connection.Open();
-                    tableCmd.CommandText = $@"UPDATE coding SET 
-                                                StartTime = '{coding.StartTime}'
-                                                EndTime = '{coding.EndTime}'
-                                                Duration = '{coding.Duration}'
-                                            WHERE
-                                                Id = '{coding.Id}'";
-                    tableCmd.ExecuteNonQuery();
-                }
+                connection.Open();
+                var insert = @"UPDATE coding SET 
+                                StartTime = @StartTime,
+                                EndTime = @EndTime,
+                                Duration = @Duration
+                            WHERE
+                                Id = @Id";
+                connection.Execute(insert, coding);
             }
             AnsiConsole.WriteLine($"\nRecord with Id {coding.Id} was successfully updated! Press any key to continue...");
             Console.ReadKey();
         }
         catch (Exception e)
         {
-            AnsiConsole.WriteLine("Error! Details: " + e.Message);
+            AnsiConsole.Write($"\nError! Details: {e.Message}\nPress any key to continue... ");
+            Console.ReadKey();
         }
     }
 }

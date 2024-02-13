@@ -20,6 +20,6 @@ internal class Coding
 
         TimeSpan duration = end - start;
 
-        return duration.ToString(@"hh\:mm");
+        return string.Format("{0:%d} days, {0:%h} hours, {0:%m} minutes", duration);
     }
 }

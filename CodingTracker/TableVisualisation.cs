@@ -15,7 +15,7 @@ internal class TableVisualisation
 
         foreach (var c in tableData)
         {
-            table.AddRow(c.Id.ToString(), $"{c.StartTime}", $"{c.EndTime}", $"{c.Duration} hours").Centered();
+            table.AddRow(c.Id.ToString(), $"{c.StartTime}", $"{c.EndTime}", $"{c.Duration}").Centered();
         }
 
         AnsiConsole.Write(table);
