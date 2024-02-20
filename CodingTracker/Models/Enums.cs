@@ -14,8 +14,8 @@ internal class Enums
 
     public enum UpdatingSelection
     {
-        StartTime,
-        EndTime,
+        UpdateStartTime,
+        UpdateEndTime,
         SaveChanges,
         MainMenu
     }

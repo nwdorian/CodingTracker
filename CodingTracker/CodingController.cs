@@ -71,7 +71,7 @@ internal class CodingController
             {
                 connection.Open();
                 var get = $"SELECT * FROM coding WHERE Id = @Id";
-                return connection.QuerySingle<Coding>(get, new { Id = id });
+                return connection.QuerySingleOrDefault<Coding>(get, new { Id = id });
             }
         }
         catch (Exception e)
@@ -82,7 +82,7 @@ internal class CodingController
         return null;
     }
 
-    internal void Delete(int id)
+    internal void Delete(Coding coding)
     {
         try
         {
@@ -90,9 +90,9 @@ internal class CodingController
             {
                 connection.Open();
                 var delete = $"DELETE FROM coding WHERE Id = @Id";
-                connection.Execute(delete, new { Id = id });
+                connection.Execute(delete, new { coding.Id });
             }
-            AnsiConsole.Write($"Record with {id} was succesfully deleted! Press any key to continue... ");
+            AnsiConsole.Write($"Record with {coding.Id} was succesfully deleted! Press any key to continue... ");
             Console.ReadKey();
         }
         catch (Exception e)

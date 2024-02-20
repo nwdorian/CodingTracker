@@ -3,9 +3,9 @@
 internal class Coding
 {
     public int Id { get; set; }
-    public string? StartTime { get; set; }
-    public string? EndTime { get; set; }
-    public string? Duration
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public TimeSpan Duration
     {
         get
         {
@@ -13,13 +13,8 @@ internal class Coding
         }
     }
 
-    private string? CalculateDuration()
+    private TimeSpan CalculateDuration()
     {
-        DateTime start = DateTime.Parse(StartTime);
-        DateTime end = DateTime.Parse(EndTime);
-
-        TimeSpan duration = end - start;
-
-        return string.Format("{0:%d} days, {0:%h} hours, {0:%m} minutes", duration);
+        return EndTime - StartTime;
     }
 }

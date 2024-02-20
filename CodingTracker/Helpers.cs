@@ -9,11 +9,12 @@ internal static class Helpers
     {
         return AnsiConsole.Prompt(
             new TextPrompt<string>(message)
-            .Validate(dateInput =>
+            .Validate(input =>
             {
-                return (!DateTime.TryParseExact(dateInput, "dd-MM-yy H:mm", new CultureInfo("en-US"), DateTimeStyles.None, out _)) ?
-                ValidationResult.Error("[red]Invalid input! Please provide the following format (dd-MM-yy hh:mm)[/]") : ValidationResult.Success();
+                return (!DateTime.TryParseExact(input, "dd-MM-yy H:mm", new CultureInfo("en-US"), DateTimeStyles.None, out _)) ?
+                ValidationResult.Error("[red]Invalid input! Please provide the following format (dd-MM-yy)[/]") : ValidationResult.Success();
             }));
+
     }
 
     internal static int GetNumberInput(string message)
@@ -31,11 +32,11 @@ internal static class Helpers
             }));
     }
 
-    internal static bool ValidateEndDate(string startDate, string endDate)
+    internal static bool ValidateDate(string startTime, string endTime)
     {
-        DateTime start = DateTime.Parse(startDate);
-        DateTime end = DateTime.Parse(endDate);
-
+        DateTime start = DateTime.ParseExact(startTime, "dd-MM-yy H:mm", new CultureInfo("en-US"));
+        DateTime end = DateTime.ParseExact(endTime, "dd-MM-yy H:mm", new CultureInfo("en-US"));
+        
         if (start > end)
         {
             return false;
