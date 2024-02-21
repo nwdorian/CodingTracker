@@ -9,6 +9,7 @@ internal class Enums
         AddRecord,
         UpdateRecord,
         DeleteRecord,
+        ViewReports,
         CloseApplication
     }
 
@@ -17,6 +18,14 @@ internal class Enums
         UpdateStartTime,
         UpdateEndTime,
         SaveChanges,
+        MainMenu
+    }
+
+    public enum ReportSelection
+    {
+        Weekly,
+        Monthly,
+        Yearly,
         MainMenu
     }
 }

@@ -54,7 +54,7 @@ internal class CodingController
                 tableData = connection.Query<Coding>(getAll).ToList();
             }
 
-            TableVisualisation.ShowTable(tableData);
+            TableVisualisation.ShowTable(tableData, "ALL CODING RECORDS");
         }
         catch (Exception e)
         {
@@ -72,6 +72,25 @@ internal class CodingController
                 connection.Open();
                 var get = $"SELECT * FROM coding WHERE Id = @Id";
                 return connection.QuerySingleOrDefault<Coding>(get, new { Id = id });
+            }
+        }
+        catch (Exception e)
+        {
+            AnsiConsole.Write($"\nError! Details: {e.Message}\nPress any key to continue... ");
+            Console.ReadKey();
+        }
+        return null;
+    }
+
+    internal List<Coding>? GetByTimePeriod(DateTime date)
+    {
+        try
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var getPeriod = "SELECT * FROM coding WHERE StartTime >= @Date";
+                return connection.Query<Coding>(getPeriod, date).ToList();
             }
         }
         catch (Exception e)

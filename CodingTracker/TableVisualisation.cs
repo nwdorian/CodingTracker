@@ -5,11 +5,11 @@ namespace CodingTracker;
 
 internal class TableVisualisation
 {
-    internal static void ShowTable(List<Coding> tableData)
+    internal static void ShowTable(List<Coding> tableData, string title)
     {
         var table = new Table();
 
-        table.Title = new TableTitle("CODING RECORDS", "bold");
+        table.Title = new TableTitle(title, "bold");
 
         table.AddColumns($"[{Color.Olive}]Id[/]", $"[{Color.Olive}]Start[/]", $"[{Color.Olive}]End[/]", $"[{Color.Olive}]Duration[/]").Centered();
 

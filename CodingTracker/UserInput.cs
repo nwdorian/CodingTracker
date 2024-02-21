@@ -1,6 +1,7 @@
 ﻿using CodingTracker.Models;
 using Spectre.Console;
 using System.Globalization;
+using System.Text;
 using static CodingTracker.Models.Enums;
 
 namespace CodingTracker;
@@ -25,6 +26,7 @@ internal class UserInput
                             MenuSelection.AddRecord,
                             MenuSelection.UpdateRecord,
                             MenuSelection.DeleteRecord,
+                            MenuSelection.ViewReports,
                             MenuSelection.CloseApplication)
                             );
 
@@ -46,9 +48,14 @@ internal class UserInput
                     break;
                 case MenuSelection.UpdateRecord:
                     ProcessUpdate();
+                    MainMenu();
                     break;
                 case MenuSelection.DeleteRecord:
                     ProcessDelete();
+                    MainMenu();
+                    break;
+                case MenuSelection.ViewReports:
+                    ReportsMenu();
                     MainMenu();
                     break;
                 case MenuSelection.CloseApplication:
@@ -97,13 +104,46 @@ internal class UserInput
                     coding.EndTime = DateTime.ParseExact(newEnd, "dd-MM-yy H:mm", new CultureInfo("en-US"));
                     break;
                 case UpdatingSelection.SaveChanges:
-                    updating = false;
                     codingController.Update(coding);
-                    MainMenu();
+                    updating = false;
                     break;
                 case UpdatingSelection.MainMenu:
                     updating = false;
-                    MainMenu();
+                    break;
+            }
+        }
+    }
+
+    internal void ReportsMenu()
+    {
+        bool repeat = true;
+
+        while (repeat)
+        {
+            Console.Clear();
+
+            var selection = AnsiConsole.Prompt(
+                new SelectionPrompt<ReportSelection>()
+                .Title("Select from the options below:")
+                .PageSize(10)
+                .AddChoices(ReportSelection.Weekly,
+                            ReportSelection.Monthly,
+                            ReportSelection.Yearly,
+                            ReportSelection.MainMenu)
+                );
+            switch (selection)
+            {
+                case ReportSelection.Weekly:
+                    ProcessReport(DateTime.Now.AddDays(-7), "WEEKLY CODING REPORTS");
+                    break;
+                case ReportSelection.Monthly:
+                    ProcessReport(DateTime.Now.AddMonths(-1), "MONTHLY CODING REPORTS");
+                    break;
+                case ReportSelection.Yearly:
+                    ProcessReport(DateTime.Now.AddYears(-1), "YEARLY CODING REPORTS");
+                    break;
+                case ReportSelection.MainMenu:
+                    repeat = false;
                     break;
             }
         }
@@ -186,5 +226,39 @@ internal class UserInput
         coding.EndTime = DateTime.Now;
 
         codingController.Post(coding);
+    }
+
+    private void ProcessReport(DateTime period, string title)
+    {
+        var tableData = codingController.GetByTimePeriod(period);
+
+        var order = Helpers.SelectOrdering();
+
+        if (order == "Ascending")
+        {
+            var asc = tableData?.OrderBy(s => s.StartTime).ToList();
+            TableVisualisation.ShowTable(asc!, title);
+        }
+        else
+        {
+            var desc = tableData?.OrderByDescending(s => s.StartTime).ToList();
+            TableVisualisation.ShowTable(desc!, title);
+        }
+
+        TimeSpan totalDuration = new TimeSpan();
+
+        foreach (var c in tableData!)
+        {
+            totalDuration += c.Duration;
+        }
+
+        AnsiConsole.MarkupLineInterpolated($"\nTotal coding duration: {totalDuration.TotalHours:N0} hours : {totalDuration.Minutes} minutes");
+
+        var average = totalDuration.Ticks / tableData.Count;
+        var averageTime = new TimeSpan(average);
+        AnsiConsole.MarkupLineInterpolated($"Average coding duration per session: {averageTime.Hours} hours : {averageTime.Minutes} minutes");
+
+        AnsiConsole.Write("\nPress any key to continue...");
+        Console.ReadKey();
     }
 }

@@ -43,4 +43,17 @@ internal static class Helpers
         }
         return true;
     }
+
+    internal static string? SelectOrdering()
+    {
+        return AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+            .Title("Select ordering for the report:")
+            .PageSize(10)
+            .AddChoices(new[]
+            {
+                "Ascending",
+                "Descending"
+            }));
+    }
 }
