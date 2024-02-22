@@ -12,7 +12,7 @@ internal static class Helpers
             .Validate(input =>
             {
                 return (!DateTime.TryParseExact(input, "dd-MM-yy H:mm", new CultureInfo("en-US"), DateTimeStyles.None, out _)) ?
-                ValidationResult.Error("[red]Invalid input! Please provide the following format (dd-MM-yy H:mm)[/]") : ValidationResult.Success();
+                ValidationResult.Error("\n[red]Invalid input! Please provide the following format (dd-MM-yy H:mm)[/]\n") : ValidationResult.Success();
             }));
     }
 
@@ -23,7 +23,7 @@ internal static class Helpers
             .Validate(input =>
             {
                 return (!DateTime.TryParseExact(input, "dd-MM-yy", new CultureInfo("en-US"), DateTimeStyles.None, out _)) ?
-                ValidationResult.Error("[red]Invalid input! Please provide the following format (dd-MM-yy)[/]") : ValidationResult.Success();
+                ValidationResult.Error("\n[red]Invalid input! Please provide the following format (dd-MM-yy)[/]\n") : ValidationResult.Success();
             }));
     }
 
@@ -36,7 +36,7 @@ internal static class Helpers
             {
                 return num switch
                 {
-                    <= 0 => ValidationResult.Error("[red]Number must be bigger then 0![/]"),
+                    <= 0 => ValidationResult.Error("\n[red]Number must be bigger then 0![/]\n"),
                     _ => ValidationResult.Success()
                 };
             }));
