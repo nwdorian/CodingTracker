@@ -121,6 +121,8 @@ internal class UserInput
         while (repeat)
         {
             Console.Clear();
+            Console.WriteLine("\x1b[3J");
+            Console.Clear();
 
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<ReportSelection>()
@@ -171,6 +173,8 @@ internal class UserInput
     private void ProcessDelete()
     {
         Console.Clear();
+        Console.WriteLine("\x1b[3J");
+        Console.Clear();
         codingController.Get();
 
         int id = Helpers.GetNumberInput("Please type the Id of the record you want to delete:");
@@ -191,6 +195,8 @@ internal class UserInput
 
     private void ProcessUpdate()
     {
+        Console.Clear();
+        Console.WriteLine("\x1b[3J");
         Console.Clear();
         codingController.Get();
 
@@ -252,11 +258,11 @@ internal class UserInput
             totalDuration += c.Duration;
         }
 
-        AnsiConsole.MarkupLineInterpolated($"\nTotal coding duration: {totalDuration.TotalHours:N0} hours : {totalDuration.Minutes} minutes");
+        AnsiConsole.MarkupLineInterpolated($"\nTotal coding duration: {(int)totalDuration.TotalHours} hours and {totalDuration.Minutes} minutes");
 
         var average = totalDuration.Ticks / tableData.Count;
         var averageTime = new TimeSpan(average);
-        AnsiConsole.MarkupLineInterpolated($"Average coding duration per session: {averageTime.Hours} hours : {averageTime.Minutes} minutes");
+        AnsiConsole.MarkupLineInterpolated($"Average coding duration per session: {averageTime.Hours} hours and {averageTime.Minutes} minutes");
 
         AnsiConsole.Write("\nPress any key to continue...");
         Console.ReadKey();

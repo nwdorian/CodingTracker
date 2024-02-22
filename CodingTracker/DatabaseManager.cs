@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using CodingTracker.Models;
+using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
@@ -22,22 +23,53 @@ internal class DatabaseManager
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
-                    connection.Open();
+                connection.Open();
 
-                    var createTable =
-                        @"CREATE TABLE IF NOT EXISTS coding(
+                var createTable =
+                    @"CREATE TABLE IF NOT EXISTS coding(
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         StartTime TEXT,
                         EndTime TEXT,
                         Duration TEXT
                         )";
 
-                    connection.Execute(createTable);
+                connection.Execute(createTable);
             }
         }
         catch (Exception e)
         {
-            AnsiConsole.WriteLine("Error! Details: " + e.Message);
+            AnsiConsole.Write($"\nError! Details: {e.Message}\nPress any key to continue... ");
+            Console.ReadKey();
+        }
+    }
+
+    internal void SeedDatabase()
+    {
+        var codingData = DataGenerator.GenerateCodingData();
+
+        try
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                var checkTable = "SELECT * FROM Coding";
+
+                var count = connection.QueryFirstOrDefault<Coding>(checkTable);
+
+                if (count == default)
+                {
+                    var bulkInsert = "INSERT INTO Coding (StartTime, EndTime, Duration) VALUES (@StartTime, @EndTime, @Duration)";
+
+                    connection.Execute(bulkInsert, codingData);
+                }
+                
+            }
+        }
+        catch (Exception e)
+        {
+            AnsiConsole.Write($"\nError! Details: {e.Message}\nPress any key to continue... ");
+            Console.ReadKey();
         }
     }
 }
