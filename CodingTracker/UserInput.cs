@@ -1,7 +1,6 @@
 ﻿using CodingTracker.Models;
 using Spectre.Console;
 using System.Globalization;
-using System.Text;
 using static CodingTracker.Models.Enums;
 
 namespace CodingTracker;
@@ -23,10 +22,8 @@ internal class UserInput
                 .Title("Welcome to [green]Coding tracker[/]\nWhat would you like to do?")
                 .PageSize(10)
                 .AddChoices(MenuSelection.LiveSession,
-                            MenuSelection.ViewRecords,
-                            MenuSelection.AddRecord,
-                            MenuSelection.UpdateRecord,
-                            MenuSelection.DeleteRecord,
+                            MenuSelection.ManageRecords,
+                            MenuSelection.ViewAllRecords,
                             MenuSelection.ViewReports,
                             MenuSelection.SetGoal,
                             MenuSelection.ViewGoals,
@@ -39,22 +36,14 @@ internal class UserInput
                     ProcessLiveSession();
                     MainMenu();
                     break;
-                case MenuSelection.ViewRecords:
+                case MenuSelection.ViewAllRecords:
                     codingController.Get();
                     AnsiConsole.Write("\nPress any key to continue... ");
                     Console.ReadKey();
                     MainMenu();
                     break;
-                case MenuSelection.AddRecord:
-                    ProcessAdd();
-                    MainMenu();
-                    break;
-                case MenuSelection.UpdateRecord:
-                    ProcessUpdate();
-                    MainMenu();
-                    break;
-                case MenuSelection.DeleteRecord:
-                    ProcessDelete();
+                case MenuSelection.ManageRecords:
+                    RecordsMenu();
                     MainMenu();
                     break;
                 case MenuSelection.ViewReports:
@@ -78,6 +67,43 @@ internal class UserInput
                     {
                         repeatMenu = true;
                     }
+                    break;
+            }
+        }
+    }
+
+    internal void RecordsMenu()
+    {
+        bool repeat = true;
+
+        while (repeat)
+        {
+            Console.Clear();
+            Console.WriteLine("\x1b[3J");
+            Console.Clear();
+
+            var selection = AnsiConsole.Prompt(
+                new SelectionPrompt<RecordsSelection>()
+                .Title("Select from the options below:")
+                .PageSize(10)
+                .AddChoices(RecordsSelection.AddRecord,
+                            RecordsSelection.DeleteRecord,
+                            RecordsSelection.UpdateRecord,
+                            RecordsSelection.MainMenu)
+                );
+            switch (selection)
+            {
+                case RecordsSelection.AddRecord:
+                    ProcessAdd();
+                    break;
+                case RecordsSelection.DeleteRecord:
+                    ProcessDelete();
+                    break;
+                case RecordsSelection.UpdateRecord:
+                    ProcessUpdate();
+                    break;
+                case RecordsSelection.MainMenu:
+                    repeat = false;
                     break;
             }
         }
@@ -348,7 +374,6 @@ internal class UserInput
             AnsiConsole.WriteLine($"\nYou need to code for {hoursPerDay:N0} hours per day to reach your goal of {goal.Amount}h until {goal.EndDate.ToString("dd-MM-yy")}");
             AnsiConsole.Write("\nPress any key to continue...");
             Console.ReadKey();
-
         }
     }
 }

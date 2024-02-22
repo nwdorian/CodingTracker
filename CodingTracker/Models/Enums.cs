@@ -5,14 +5,20 @@ internal class Enums
     public enum MenuSelection
     {
         LiveSession,
-        ViewRecords,
-        AddRecord,
-        UpdateRecord,
-        DeleteRecord,
+        ManageRecords,
+        ViewAllRecords,
         ViewReports,
         SetGoal,
         ViewGoals,
         CloseApplication
+    }
+
+    public enum RecordsSelection
+    {
+        AddRecord,
+        UpdateRecord,
+        DeleteRecord,
+        MainMenu
     }
 
     public enum UpdatingSelection
