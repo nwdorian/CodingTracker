@@ -334,7 +334,7 @@ internal class UserInput
         Console.Clear();
         var tableData = goalController.GetAll();
 
-        TableVisualisation.ShowGoalsTable(tableData, "GOAL RECORDS");
+        TableVisualisation.ShowGoalsTable(tableData!, "GOAL RECORDS");
 
         var id = Helpers.GetNumberInput("Enter the goal Id for which you want to see the progress:");
 
@@ -352,28 +352,37 @@ internal class UserInput
 
             TimeSpan codingHours = new TimeSpan();
 
-            foreach (var c in codingRecords)
+            foreach (var c in codingRecords!)
             {
                 codingHours += c.Duration;
             }
 
             var remainingHours = goal.Amount - codingHours.TotalHours;
 
-            AnsiConsole.MarkupLineInterpolated($"\n[green]{goal.StartDate.ToString("dd-MM-yy")} - {goal.EndDate.ToString("dd-MM-yy")}[/]");
+            if (remainingHours > 0)
+            {
+                AnsiConsole.MarkupLineInterpolated($"\n[green]{goal.StartDate.ToString("dd-MM-yy")} - {goal.EndDate.ToString("dd-MM-yy")}[/]");
 
-            AnsiConsole.Write(new BreakdownChart()
-                .Width(60)
-                .UseValueFormatter(v => v.ToString("N0"))
-                .AddItem("Progress (h)", codingHours.TotalHours, Color.Blue)
-                .AddItem("Remaining (h)", remainingHours, Color.Red));
+                AnsiConsole.Write(new BreakdownChart()
+                    .Width(60)
+                    .UseValueFormatter(v => v.ToString("N0"))
+                    .AddItem("Progress(h)", codingHours.TotalHours, Color.Blue)
+                    .AddItem("Remaining(h)", remainingHours, Color.Red));
 
-            TimeSpan daysToReachGoal = new TimeSpan();
-            daysToReachGoal = goal.EndDate - DateTime.Now;
-            var hoursPerDay = remainingHours / daysToReachGoal.TotalDays;
+                TimeSpan daysToReachGoal = new TimeSpan();
+                daysToReachGoal = goal.EndDate - DateTime.Now;
+                var hoursPerDay = remainingHours / daysToReachGoal.TotalDays;
 
-            AnsiConsole.WriteLine($"\nYou need to code for {hoursPerDay:N0} hours per day to reach your goal of {goal.Amount}h until {goal.EndDate.ToString("dd-MM-yy")}");
-            AnsiConsole.Write("\nPress any key to continue...");
-            Console.ReadKey();
+                AnsiConsole.WriteLine($"\nYou need to code for {hoursPerDay:N0} hours per day to reach your goal of {goal.Amount}h until {goal.EndDate.ToString("dd-MM-yy")}");
+                AnsiConsole.Write("\nPress any key to continue...");
+                Console.ReadKey();
+            }
+            else
+            {
+                AnsiConsole.WriteLine($"You have finished the goal with the Id {goal.Id}!");
+                AnsiConsole.Write("\nPress any key to continue...");
+                Console.ReadKey();
+            }
         }
     }
 }

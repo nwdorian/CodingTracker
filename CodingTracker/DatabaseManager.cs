@@ -55,8 +55,6 @@ internal class DatabaseManager
 
     internal void SeedDatabase()
     {
-        var codingData = DataGenerator.GenerateCodingData();
-
         try
         {
             using (var connection = new SqliteConnection(_connectionString))
@@ -69,11 +67,12 @@ internal class DatabaseManager
 
                 if (count == default)
                 {
+                    var codingData = DataGenerator.GenerateCodingData();
+
                     var bulkInsert = "INSERT INTO Coding (StartTime, EndTime, Duration) VALUES (@StartTime, @EndTime, @Duration)";
 
                     connection.Execute(bulkInsert, codingData);
                 }
-                
             }
         }
         catch (Exception e)
