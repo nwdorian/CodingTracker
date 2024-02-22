@@ -54,7 +54,7 @@ internal class CodingController
                 tableData = connection.Query<Coding>(getAll).ToList();
             }
 
-            TableVisualisation.ShowTable(tableData, "ALL CODING RECORDS");
+            TableVisualisation.ShowCodingTable(tableData, "ALL CODING RECORDS");
         }
         catch (Exception e)
         {

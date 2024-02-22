@@ -5,16 +5,26 @@ namespace CodingTracker;
 
 internal static class Helpers
 {
-    internal static string GetDateInput(string message)
+    internal static string GetDateTimeInput(string message)
     {
         return AnsiConsole.Prompt(
             new TextPrompt<string>(message)
             .Validate(input =>
             {
                 return (!DateTime.TryParseExact(input, "dd-MM-yy H:mm", new CultureInfo("en-US"), DateTimeStyles.None, out _)) ?
+                ValidationResult.Error("[red]Invalid input! Please provide the following format (dd-MM-yy H:mm)[/]") : ValidationResult.Success();
+            }));
+    }
+
+    internal static string GetDateInput(string message)
+    {
+        return AnsiConsole.Prompt(
+            new TextPrompt<string>(message)
+            .Validate(input =>
+            {
+                return (!DateTime.TryParseExact(input, "dd-MM-yy", new CultureInfo("en-US"), DateTimeStyles.None, out _)) ?
                 ValidationResult.Error("[red]Invalid input! Please provide the following format (dd-MM-yy)[/]") : ValidationResult.Success();
             }));
-
     }
 
     internal static int GetNumberInput(string message)
@@ -32,11 +42,23 @@ internal static class Helpers
             }));
     }
 
-    internal static bool ValidateDate(string startTime, string endTime)
+    internal static bool ValidateDateTime(string startTime, string endTime)
     {
         DateTime start = DateTime.ParseExact(startTime, "dd-MM-yy H:mm", new CultureInfo("en-US"));
         DateTime end = DateTime.ParseExact(endTime, "dd-MM-yy H:mm", new CultureInfo("en-US"));
         
+        if (start > end)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    internal static bool ValidateDate(string startTime, string endTime)
+    {
+        DateTime start = DateTime.ParseExact(startTime, "dd-MM-yy", new CultureInfo("en-US"));
+        DateTime end = DateTime.ParseExact(endTime, "dd-MM-yy", new CultureInfo("en-US"));
+
         if (start > end)
         {
             return false;

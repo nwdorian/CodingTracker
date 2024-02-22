@@ -9,6 +9,7 @@ namespace CodingTracker;
 internal class UserInput
 {
     CodingController codingController = new();
+    GoalController goalController = new();
     internal void MainMenu()
     {
         bool repeatMenu = true;
@@ -27,6 +28,8 @@ internal class UserInput
                             MenuSelection.UpdateRecord,
                             MenuSelection.DeleteRecord,
                             MenuSelection.ViewReports,
+                            MenuSelection.SetGoal,
+                            MenuSelection.ViewGoals,
                             MenuSelection.CloseApplication)
                             );
 
@@ -56,6 +59,14 @@ internal class UserInput
                     break;
                 case MenuSelection.ViewReports:
                     ReportsMenu();
+                    MainMenu();
+                    break;
+                case MenuSelection.SetGoal:
+                    ProcessAddGoal();
+                    MainMenu();
+                    break;
+                case MenuSelection.ViewGoals:
+                    ProcessGoals();
                     MainMenu();
                     break;
                 case MenuSelection.CloseApplication:
@@ -89,16 +100,16 @@ internal class UserInput
             switch (selection)
             {
                 case UpdatingSelection.UpdateStartTime:
-                    var newStart = Helpers.GetDateInput("Please insert new start date and time (format: dd-MM-yy H:mm):");
+                    var newStart = Helpers.GetDateTimeInput("Please insert new start date and time (format: dd-MM-yy H:mm):");
                     coding.StartTime = DateTime.ParseExact(newStart, "dd-MM-yy H:mm", new CultureInfo("en-US"));
                     break;
                 case UpdatingSelection.UpdateEndTime:
-                    var newEnd = Helpers.GetDateInput("Please insert new end date and time (format: dd-MM-yy H:mm):");
+                    var newEnd = Helpers.GetDateTimeInput("Please insert new end date and time (format: dd-MM-yy H:mm):");
 
-                    while (!Helpers.ValidateDate(coding.StartTime.ToString("dd-MM-yy H:mm"), newEnd))
+                    while (!Helpers.ValidateDateTime(coding.StartTime.ToString("dd-MM-yy H:mm"), newEnd))
                     {
                         AnsiConsole.MarkupLine("\n[red]Invalid input! End time can't be before start time![/]\n");
-                        newEnd = Helpers.GetDateInput("Please insert a valid end date and time (format: dd-MM-yy H:mm): ");
+                        newEnd = Helpers.GetDateTimeInput("Please insert a valid end date and time (format: dd-MM-yy H:mm): ");
                     }
 
                     coding.EndTime = DateTime.ParseExact(newEnd, "dd-MM-yy H:mm", new CultureInfo("en-US"));
@@ -153,13 +164,13 @@ internal class UserInput
 
     private void ProcessAdd()
     {
-        var startTime = Helpers.GetDateInput("Please insert the start date and time (format: dd-MM-yy H:mm): ");
-        var endTime = Helpers.GetDateInput("Please insert the end date and time (format: dd-MM-yy H:mm): ");
+        var startTime = Helpers.GetDateTimeInput("Please insert the start date and time (format: dd-MM-yy H:mm): ");
+        var endTime = Helpers.GetDateTimeInput("Please insert the end date and time (format: dd-MM-yy H:mm): ");
 
-        while (!Helpers.ValidateDate(startTime, endTime))
+        while (!Helpers.ValidateDateTime(startTime, endTime))
         {
             AnsiConsole.MarkupLine("\n[red]Invalid input! End time can't be before start time![/]\n");
-            endTime = Helpers.GetDateInput("Please insert a valid end date and time (format: dd-MM-yy H:mm): ");
+            endTime = Helpers.GetDateTimeInput("Please insert a valid end date and time (format: dd-MM-yy H:mm): ");
         }
 
         Coding coding = new Coding();
@@ -243,12 +254,12 @@ internal class UserInput
         if (order == "Ascending")
         {
             var asc = tableData?.OrderBy(s => s.StartTime).ToList();
-            TableVisualisation.ShowTable(asc!, title);
+            TableVisualisation.ShowCodingTable(asc!, title);
         }
         else
         {
             var desc = tableData?.OrderByDescending(s => s.StartTime).ToList();
-            TableVisualisation.ShowTable(desc!, title);
+            TableVisualisation.ShowCodingTable(desc!, title);
         }
 
         TimeSpan totalDuration = new TimeSpan();
@@ -266,5 +277,78 @@ internal class UserInput
 
         AnsiConsole.Write("\nPress any key to continue...");
         Console.ReadKey();
+    }
+
+    private void ProcessAddGoal()
+    {
+        var startDate = Helpers.GetDateInput("Please insert the goal start date (format: dd-MM-yy):");
+        var endDate = Helpers.GetDateInput("Please insert the goal end date (format: dd-MM-yy):");
+
+        while (!Helpers.ValidateDate(startDate, endDate))
+        {
+            AnsiConsole.MarkupLine("\n[red]Invalid input! End date can't be before start date![/]\n");
+            endDate = Helpers.GetDateInput("Please insert a valid goal end date (format: dd-MM-yy): ");
+        }
+
+        var goalAmount = Helpers.GetNumberInput("Please insert the amount of coding hours for the goal:");
+
+        Goal goal = new Goal();
+
+        goal.StartDate = DateTime.ParseExact(startDate, "dd-MM-yy", new CultureInfo("en-US"), DateTimeStyles.None);
+        goal.EndDate = DateTime.ParseExact(endDate, "dd-MM-yy", new CultureInfo("en-US"), DateTimeStyles.None);
+        goal.Amount = goalAmount;
+
+        goalController.Post(goal);
+    }
+
+    private void ProcessGoals()
+    {
+        Console.Clear();
+        Console.WriteLine("\x1b[3J");
+        Console.Clear();
+        var tableData = goalController.GetAll();
+
+        TableVisualisation.ShowGoalsTable(tableData, "GOAL RECORDS");
+
+        var id = Helpers.GetNumberInput("Enter the goal Id for which you want to see the progress:");
+
+        var goal = goalController.GetById(id);
+
+        if (goal is null)
+        {
+            AnsiConsole.Write($"\nGoal with Id {id} doesn't exist! Press any key to continue...");
+            Console.ReadKey();
+            ProcessGoals();
+        }
+        else
+        {
+            var codingRecords = codingController.GetByTimePeriod(goal.StartDate);
+
+            TimeSpan codingHours = new TimeSpan();
+
+            foreach (var c in codingRecords)
+            {
+                codingHours += c.Duration;
+            }
+
+            var remainingHours = goal.Amount - codingHours.TotalHours;
+
+            AnsiConsole.MarkupLineInterpolated($"\n[green]{goal.StartDate.ToString("dd-MM-yy")} - {goal.EndDate.ToString("dd-MM-yy")}[/]");
+
+            AnsiConsole.Write(new BreakdownChart()
+                .Width(60)
+                .UseValueFormatter(v => v.ToString("N0"))
+                .AddItem("Progress (h)", codingHours.TotalHours, Color.Blue)
+                .AddItem("Remaining (h)", remainingHours, Color.Red));
+
+            TimeSpan daysToReachGoal = new TimeSpan();
+            daysToReachGoal = goal.EndDate - DateTime.Now;
+            var hoursPerDay = remainingHours / daysToReachGoal.TotalDays;
+
+            AnsiConsole.WriteLine($"\nYou need to code for {hoursPerDay:N0} hours per day to reach your goal of {goal.Amount}h until {goal.EndDate.ToString("dd-MM-yy")}");
+            AnsiConsole.Write("\nPress any key to continue...");
+            Console.ReadKey();
+
+        }
     }
 }

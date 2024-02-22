@@ -3,6 +3,7 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CodingTracker;
 
@@ -31,6 +32,16 @@ internal class DatabaseManager
                         StartTime TEXT,
                         EndTime TEXT,
                         Duration TEXT
+                        )";
+
+                connection.Execute(createTable);
+
+                createTable =
+                    @"CREATE TABLE IF NOT EXISTS goals(
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        StartDate TEXT,
+                        EndDate TEXT,
+                        Amount INT
                         )";
 
                 connection.Execute(createTable);

@@ -10,6 +10,8 @@ internal class Enums
         UpdateRecord,
         DeleteRecord,
         ViewReports,
+        SetGoal,
+        ViewGoals,
         CloseApplication
     }
 
